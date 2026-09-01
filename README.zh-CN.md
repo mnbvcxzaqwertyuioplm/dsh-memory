@@ -61,6 +61,22 @@ systemctl restart dsh    # 或以你的方式重启
 | `semantic` | `false` 则不做 embedding，纯关键词 | `true` |
 | `memoryDbPath` | SQLite 库路径 | `~/.dsh-memory/memories.db` |
 | `zhipuEnvPath` | 智谱凭据 `.env` 文件路径 | `~/.dsh-memory/.memenv` |
+| `forceMemoryWords` | 强制记忆信号词（数组）；命中即要求 agent 先调用 `memory_add` 再回答 | `[]`（默认不启用） |
+
+`forceMemoryWords` 示例（在 profile 的 `cordis.patch.yml` 里配置，不进公开仓库）：
+
+```yaml
+- id: dsh-memory
+  config:
+    forceMemoryWords:
+      - 记住
+      - 重要
+      - 珍贵
+      - 特别
+      - 务必
+      - 一定
+      - 必须
+```
 
 智谱凭据优先读环境变量，其次读 `zhipuEnvPath` 指向的文件：
 

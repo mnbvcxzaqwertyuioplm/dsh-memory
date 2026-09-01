@@ -61,6 +61,22 @@ Everything is optional — skip it all and the plugin still works (falling back 
 | `semantic` | `false` skips embeddings, keyword-only | `true` |
 | `memoryDbPath` | SQLite database path | `~/.dsh-memory/memories.db` |
 | `zhipuEnvPath` | Path to the Zhipu credentials `.env` file | `~/.dsh-memory/.memenv` |
+| `forceMemoryWords` | Force-memory signal words (array). When any word appears in a user message, the agent must call `memory_add` first, then answer | `[]` (disabled by default) |
+
+`forceMemoryWords` example (set in your profile's `cordis.patch.yml`, not in the public repo):
+
+```yaml
+- id: dsh-memory
+  config:
+    forceMemoryWords:
+      - 记住
+      - 重要
+      - 珍贵
+      - 特别
+      - 务必
+      - 一定
+      - 必须
+```
 
 Zhipu credentials are read from environment variables first, then from the file at `zhipuEnvPath`:
 
