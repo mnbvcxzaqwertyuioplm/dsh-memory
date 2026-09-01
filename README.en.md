@@ -65,6 +65,11 @@ This plugin was born from a real incident: a misconfigured plugin sent a DSH web
 3. A missing key / database / service, or a failed embedding call → it logs and degrades, never interrupting startup.
 4. Errors raised inside a tool's `execute()` are caught and returned as ordinary results, never bubbling up into a session exception.
 
+## Tools and commands
+
+- **`memory_add` / `memory_search`** — as above; the agent calls them on its own when needed.
+- **`/mem <question>`** — a slash command that forces "**search memory first, then answer**". E.g. `/mem what is jarvis' sibling agent called` runs a semantic memory search, injects the results into the session, and the agent answers from those results. Use it when you are not sure the agent will remember on its own.
+
 ## Storage schema
 
 ```sql

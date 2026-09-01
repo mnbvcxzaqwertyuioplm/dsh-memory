@@ -65,6 +65,11 @@ ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
 3. 缺 key / 缺库 / 缺服务 / embedding 失败 → 记日志并降级，绝不中断启动。
 4. 工具 `execute` 内错误被捕获并作为普通结果返回，不冒泡成会话异常。
 
+## 工具与命令
+
+- **`memory_add` / `memory_search`**：见上，agent 在需要时自主调用。
+- **`/mem <问题>`**：slash command——手动触发"**先检索记忆、再回答**"。输入如 `/mem jarvis 的兄弟叫什么`，命令会先对跨会话记忆做语义检索，把结果注入会话，agent 再基于结果回答。适合你不确定 agent 会不会主动回忆时使用。
+
 ## 存储结构
 
 ```sql
