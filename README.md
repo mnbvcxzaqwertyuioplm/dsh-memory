@@ -10,11 +10,11 @@
 
 ---
 
-`dsh-memory` registers two tools and one slash command for the **web / headless** profiles, so your agent can remember you across sessions:
+`dsh-memory` registers two tools for the **web / headless** profiles, so your agent can remember you across sessions:
 
 - **`memory_add`** — persist a fact worth keeping long-term, auto-vectorized on the way in.
 - **`memory_search`** — recall relevant facts by **semantics** (cosine similarity), with a keyword fallback.
-- **`/mem <question>`** — a slash command that forces "search memory first, then answer."
+- **`/mem <question>`** — type this in the composer and the agent will call `memory_search` first (results render as a collapsible tool card), then answer from memory.
 
 Under the hood: Zhipu **`embedding-3`** (2048-dim) + SQLite (`node:sqlite`) + cosine similarity. **Zero new infrastructure** — no vector database, no sidecar containers. Hundreds to thousands of memories recall in milliseconds.
 

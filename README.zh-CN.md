@@ -10,11 +10,11 @@
 
 ---
 
-`dsh-memory` 为 DSH 的 **web / headless** profile 注册两个工具和一个斜杠命令，让 agent 能"跨会话记得你"：
+`dsh-memory` 为 DSH 的 **web / headless** profile 注册两个工具，让 agent 能"跨会话记得你"：
 
 - **`memory_add`** — 把一条值得长期记住的事实写入记忆（自动向量化）。
 - **`memory_search`** — 按**语义**（余弦相似度）+ 关键词从记忆召回相关事实。
-- **`/mem <问题>`** — 斜杠命令，手动触发"**先检索记忆、再回答**"。
+- **`/mem <问题>`** — 在输入框输入本前缀，agent 会先调用 `memory_search`（检索结果以可折叠工具卡片展示），再基于记忆回答。
 
 实现：智谱 **`embedding-3`**（2048 维）+ SQLite（`node:sqlite`）+ 余弦相似度。**零新增基础设施**——不起向量库、不起容器，几百到几千条记忆毫秒级召回。
 
