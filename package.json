@@ -2,6 +2,14 @@
   "name": "dsh-memory",
   "version": "0.1.0",
   "description": "DSH 本体（web/headless profile）的跨会话语义记忆工具：memory_add / memory_search。智谱 embedding-3 向量 + SQLite + 余弦相似度。配置可选、绝不因缺 key / 缺库 / 缺服务而崩。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "memory",
+    "semantic-memory",
+    "embedding"
+  ],
   "type": "module",
   "main": "lib/index.js",
   "exports": {

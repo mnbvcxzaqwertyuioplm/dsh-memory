@@ -17,6 +17,8 @@
 
 ## 安装
 
+本插件遵循 DSH 官方 **bundle** 约定（`package.json` 的 `dsh.bundle` 声明），因此能被 `dsh plugin` 识别，并以一个配置图层（layer）激活——不是普通的依赖包。
+
 安装进目标 profile（如 web）：
 
 ```bash
