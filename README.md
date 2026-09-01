@@ -1,84 +1,98 @@
 # dsh-memory
 
-**DSH（DeepSeek Harness）本体的跨会话语义记忆插件。**
+**Cross-session semantic memory for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)** — installed into any profile, so your agent actually remembers you across sessions.
 
-给 DSH 的 web / headless profile 注册两个工具，让 agent 能"跨会话记得你"：
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![DeepSeek Harness plugin](https://img.shields.io/badge/DeepSeek%20Harness-plugin-202724.svg)](https://github.com/deepseek-ai/deepseek-harness)
+[![dsh-tools](https://img.shields.io/badge/dsh--tools-%5E0.1.0--rc.0-blue.svg)]()
 
-- **`memory_add`** — 把一条值得长期记住的事实写入记忆（自动向量化）。
-- **`memory_search`** — 按**语义**（余弦相似度）+ 关键词从记忆召回相关事实。
+> 🌐 **English** · [简体中文](./README.zh-CN.md)
 
-实现：智谱 `embedding-3`（2048 维）+ SQLite（`node:sqlite`）+ 余弦相似度。**零新增基础设施**——不起向量库、不起容器，几百到几千条记忆毫秒级召回。
+---
 
-## 特性
+`dsh-memory` registers two tools and one slash command for the **web / headless** profiles, so your agent can remember you across sessions:
 
-- **配置可选、绝不崩**：缺智谱 key、缺数据库、缺 tools 服务、embedding 网络失败——全部优雅降级，绝不把 DSH 树搞崩（详见下方"设计红线"）。
-- **语义召回 + 关键词兜底**：`memory_search` 先做 embedding 余弦召回，关键词命中做加权；embedding 不可用时自动退化为纯关键词（bigram）。
-- **embedding 调用带 8s 超时**：网络差/无网时快速失败回退，不挂起会话。
+- **`memory_add`** — persist a fact worth keeping long-term, auto-vectorized on the way in.
+- **`memory_search`** — recall relevant facts by **semantics** (cosine similarity), with a keyword fallback.
+- **`/mem <question>`** — a slash command that forces "search memory first, then answer."
 
-## 安装
+Under the hood: Zhipu **`embedding-3`** (2048-dim) + SQLite (`node:sqlite`) + cosine similarity. **Zero new infrastructure** — no vector database, no sidecar containers. Hundreds to thousands of memories recall in milliseconds.
 
-本插件遵循 DSH 官方 **bundle** 约定（`package.json` 的 `dsh.bundle` 声明），因此能被 `dsh plugin` 识别，并以一个配置图层（layer）激活——不是普通的依赖包。
+## Why
 
-安装进目标 profile（如 web）：
+Your agent forgets everything between sessions. `dsh-memory` gives it a durable, semantic recall layer without adding a new service to run. It solves the "who am I / what did we agree on" problem with a few hundred bytes of SQLite and one HTTP call per write.
+
+## Features
+
+- **Zero-config, never crashes** — a missing Zhipu key, a missing database, a missing `tools` service, or a failing embedding call all degrade gracefully. This plugin will never take the DSH tree down (see [Design guarantee](#design-guarantee)).
+- **Semantic recall with keyword fallback** — `memory_search` scores by embedding cosine similarity first, then weights keyword hits; when embeddings are unavailable it falls back to pure keyword (bigram) matching.
+- **8s embedding timeout** — on a bad or missing network it fails fast and falls back to keyword search instead of hanging the session.
+
+## Installation
+
+This plugin follows the official DSH **bundle** convention (`dsh.bundle` in `package.json`), so `dsh plugin` recognizes it and activates it as a configuration layer — not a plain dependency.
+
+Install into the target profile (e.g. `web`):
 
 ```bash
 dsh plugin --profile web add dsh-memory
 ```
 
-装完**重启 DSH web** 生效（bundle 层在启动时才组合）：
+After installing, **restart DSH web** for it to take effect (the bundle layer is only composed at startup):
 
 ```bash
-systemctl restart dsh    # 或以你的方式重启
+systemctl restart dsh    # or restart however you run DSH
 ```
 
-本地安装（未发布/开发期）：
+Local / pre-release install:
 
 ```bash
-# 把本目录放进 profile 的 node_modules，并在 package.json 的
-# dsh.profile.bundles 末尾加上 "dsh-memory"，然后重启。
+# Put this directory into the profile's node_modules and append "dsh-memory"
+# to dsh.profile.bundles in package.json, then restart.
 ```
 
-## 配置
+## Configuration
 
-全部可选，不配也能用（退化为关键词检索）：
+Everything is optional — skip it all and the plugin still works (falling back to keyword search):
 
-| 配置项 | 说明 | 默认值 |
+| Config | Description | Default |
 |---|---|---|
-| `enabled` | `false` 则不注册工具 | `true` |
-| `semantic` | `false` 则不做 embedding，纯关键词 | `true` |
-| `memoryDbPath` | SQLite 库路径 | `~/workspace/Jarvis/data/jarvis-memory.db` |
-| `zhipuEnvPath` | 智谱凭据 `.env` 文件路径 | `~/workspace/Jarvis/.memenv` |
+| `enabled` | `false` disables tool registration | `true` |
+| `semantic` | `false` skips embeddings, keyword-only | `true` |
+| `memoryDbPath` | SQLite database path | `~/workspace/Jarvis/data/jarvis-memory.db` |
+| `zhipuEnvPath` | Path to the Zhipu credentials `.env` file | `~/workspace/Jarvis/.memenv` |
 
-智谱凭据优先读环境变量，其次读 `zhipuEnvPath` 指向的文件：
+Zhipu credentials are read from environment variables first, then from the file at `zhipuEnvPath`:
 
 ```
-ZHIPU_API_KEY=你的智谱key
+ZHIPU_API_KEY=your-zhipu-key
 ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4/
 ```
 
-智谱 key 在 [开放平台 bigmodel.cn](https://open.bigmodel.cn) 免费领取（embedding-3 按量计费）。
+Get a Zhipu key for free at [open.bigmodel.cn](https://open.bigmodel.cn) (`embedding-3` is billed per use).
 
-## 设计红线（为什么"绝不崩"）
+## Design guarantee
 
-这个插件诞生于一次真实事故：一个未配置好的插件把 DSH web 搞成了 crash-loop。因此本插件：
+This plugin was born from a real incident: a misconfigured plugin sent a DSH web profile into a crash-loop. So `dsh-memory` is deliberately defensive:
 
-1. `apply()` 整体 try/catch，任何错误都不向 DSH 树抛出。
-2. `inject` 只声明 `tools`（dsh-base 必带的服务），不依赖 `dsh-llm`/`agents`/http。
-3. 缺 key / 缺库 / 缺服务 / embedding 失败 → 记日志并降级，绝不中断启动。
-4. 工具 `execute` 内错误被捕获并作为普通结果返回，不冒泡成会话异常。
+1. `apply()` is wrapped in an overall `try/catch` — no error is ever thrown up into the DSH tree.
+2. `inject` only declares `tools` (a service `dsh-base` always provides). It does **not** depend on `dsh-llm`, `agents`, or `http`.
+3. A missing key / database / service, or a failed embedding call → it logs and degrades, never interrupting startup.
+4. Errors raised inside a tool's `execute()` are caught and returned as ordinary results, never bubbling up into a session exception.
 
-## 工具与命令
+## Tools
 
-- **`memory_add` / `memory_search`**：见上，agent 在需要时自主调用。
-- **`/mem <问题>`**：slash command——手动触发"**先检索记忆、再回答**"。输入如 `/mem jarvis 的兄弟叫什么`，命令会先对跨会话记忆做语义检索，把结果注入会话，agent 再基于结果回答。适合你不确定 agent 会不会主动回忆时使用。
+- **`memory_add`** — write a fact worth remembering; vectorized automatically.
+- **`memory_search`** — semantically recall the most relevant facts for a question.
+- **`/mem`** — a manual override: "search memory first, then answer." If you're not sure the agent will recall on its own, type `/mem <question>` and it will run a semantic search, inject the results, and answer from them.
 
-## 存储结构
+## Storage schema
 
 ```sql
 memories(id, text, category, source, created_at, updated_at)
-memory_embeddings(memory_id, dim, vector)   -- 2048 维 JSON 数组
+memory_embeddings(memory_id, dim, vector)   -- 2048-dim JSON array
 ```
 
-## 许可
+## License
 
 [MIT](./LICENSE)
