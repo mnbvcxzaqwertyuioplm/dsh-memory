@@ -1,0 +1,21 @@
+# 依赖与构建产物
+node_modules/
+*.tgz
+
+# 凭据与私密文件（绝不提交）
+.memenv
+.env
+*.pem
+*.key
+
+# 本地数据
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# 编辑器/系统
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,7 @@
+# dsh-memory bundle patch：为 DSH 本体注入跨会话语义记忆行。
+# 该插件只依赖 dsh-base 提供的 tools 服务，不依赖 http/agents，因此在
+# web / headless 等任何带工具的 profile 里都能随 dsh-base 之后加载。
+# 首次启动即挂载 memory_add / memory_search 两个工具，供会话 agent 调用。
+- insert:
+    - id: dsh-memory
+      name: 'dsh-memory'
