@@ -59,8 +59,8 @@ Everything is optional — skip it all and the plugin still works (falling back 
 |---|---|---|
 | `enabled` | `false` disables tool registration | `true` |
 | `semantic` | `false` skips embeddings, keyword-only | `true` |
-| `memoryDbPath` | SQLite database path | `~/workspace/Jarvis/data/jarvis-memory.db` |
-| `zhipuEnvPath` | Path to the Zhipu credentials `.env` file | `~/workspace/Jarvis/.memenv` |
+| `memoryDbPath` | SQLite database path | `~/.dsh-memory/memories.db` |
+| `zhipuEnvPath` | Path to the Zhipu credentials `.env` file | `~/.dsh-memory/.memenv` |
 
 Zhipu credentials are read from environment variables first, then from the file at `zhipuEnvPath`:
 

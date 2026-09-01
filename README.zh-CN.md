@@ -59,8 +59,8 @@ systemctl restart dsh    # 或以你的方式重启
 |---|---|---|
 | `enabled` | `false` 则不注册工具 | `true` |
 | `semantic` | `false` 则不做 embedding，纯关键词 | `true` |
-| `memoryDbPath` | SQLite 库路径 | `~/workspace/Jarvis/data/jarvis-memory.db` |
-| `zhipuEnvPath` | 智谱凭据 `.env` 文件路径 | `~/workspace/Jarvis/.memenv` |
+| `memoryDbPath` | SQLite 库路径 | `~/.dsh-memory/memories.db` |
+| `zhipuEnvPath` | 智谱凭据 `.env` 文件路径 | `~/.dsh-memory/.memenv` |
 
 智谱凭据优先读环境变量，其次读 `zhipuEnvPath` 指向的文件：
 
