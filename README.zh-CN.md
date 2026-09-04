@@ -27,6 +27,8 @@ agent 每次会话之间都会忘掉一切。`dsh-memory` 给 DSH 一个**持久
 - **零配置、绝不崩**：缺智谱 key、缺数据库、缺 tools 服务、embedding 网络失败——全部优雅降级，绝不把 DSH 树搞崩（详见"设计红线"）。
 - **语义召回 + 关键词兜底**：`memory_search` 先做 embedding 余弦召回，关键词命中做加权；embedding 不可用时自动退化为纯关键词（bigram）。
 - **embedding 调用带 8s 超时**：网络差/无网时快速失败回退，不挂起会话。
+- **写前语义去重（合并）**：`memory_add` 写入前对整库做一次余弦查重，与既有记忆高度相似（相似度 ≥ 0.9）时**合并更新既有行**——保留最新措辞、继承/更新 category、维护 `updated_at`，不新增重复条目；返回 `merged: true/false` 标识"合并更新/新增"。纠错约定：新事实与旧记忆冲突或过时时直接重记即可（新者胜）。
+- **SQLite WAL + busy_timeout=5000**：开库即生效，web 与 jarvis 大脑两进程并行写共享库时不再报 `SQLITE_BUSY`。
 
 ## 安装
 

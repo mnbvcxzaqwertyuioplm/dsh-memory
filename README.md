@@ -27,6 +27,8 @@ Your agent forgets everything between sessions. `dsh-memory` gives it a durable,
 - **Zero-config, never crashes** — a missing Zhipu key, a missing database, a missing `tools` service, or a failing embedding call all degrade gracefully. This plugin will never take the DSH tree down (see [Design guarantee](#design-guarantee)).
 - **Semantic recall with keyword fallback** — `memory_search` scores by embedding cosine similarity first, then weights keyword hits; when embeddings are unavailable it falls back to pure keyword (bigram) matching.
 - **8s embedding timeout** — on a bad or missing network it fails fast and falls back to keyword search instead of hanging the session.
+- **Write-time semantic dedup (merge)** — `memory_add` runs one cosine pass over the library before writing; a new fact that is highly similar to an existing entry (cosine ≥ 0.9) **merges into that row** — keeps the latest wording, inherits/updates `category`, maintains `updated_at`, and never adds a duplicate (returns `merged: true/false`). Correction convention: to override a stale/conflicting memory, simply record the new fact — newest wins.
+- **SQLite WAL + busy_timeout=5000** — applied when the DB opens; concurrent writers (e.g. DSH web + the Jarvis brain sharing one library) no longer hit `SQLITE_BUSY`.
 
 ## Installation
 
